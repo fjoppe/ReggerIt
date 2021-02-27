@@ -5,10 +5,10 @@ open System.Text.RegularExpressions
 /// Contains a Regular Expression Pattern
 type RexPatt
 type RexPatt
-    with
-        static member (|||) : RexPatt * RexPatt -> RexPatt
-        static member (+) : RexPatt * RexPatt -> RexPatt
-        static member (-) : RexPatt * RexPatt -> RexPatt
+with
+    static member (|||) : RexPatt * RexPatt -> RexPatt
+    static member (+) : RexPatt * RexPatt -> RexPatt
+    static member (-) : RexPatt * RexPatt -> RexPatt
 
 
 /// Regex pattern must repeat exactly given value
@@ -27,7 +27,7 @@ val OnceOrMore : RexPatt -> RexPatt
 val Optional : RexPatt -> RexPatt
 
 /// Plain regex pattern
-val Plain : string -> RexPatt 
+val Plain : string -> RexPatt
 
 /// One in Set regex pattern
 val OneOf : string -> RexPatt
@@ -41,13 +41,16 @@ val Group : RexPatt -> RexPatt
 /// Creates Regex named group
 val NamedGroup : string -> RexPatt -> RexPatt
 
-/// Regex ToString - match from string start
-val ToStringStartPattern : RexPatt -> string
 
-/// Regex ToString - full string match
-val ToFullstringPattern : RexPatt -> string
 
-/// Regex ToString - match anywhere in the string 
-val ToPattern : RexPatt -> string
+module Convert =
+    /// Regex ToString - match from string start
+    val ToStringStartPattern : RexPatt -> string
+
+    /// Regex ToString - full string match
+    val ToFullstringPattern : RexPatt -> string
+
+    /// Regex ToString - match anywhere in the string
+    val ToPattern : RexPatt -> string
 
 

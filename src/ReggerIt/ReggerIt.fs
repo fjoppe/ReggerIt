@@ -9,6 +9,7 @@ open System
 open System.Globalization
 open System.Text.RegularExpressions
 
+
 let private escaped (s:string) =
     [
         ("\\","\\\\")
@@ -25,73 +26,117 @@ let private escaped (s:string) =
         ("?","\?")
     ]
     |>  List.fold(fun (st:string) (sch,rp) -> st.Replace(sch, rp) ) s
-        
 
-type Plain =
+
+type ConstType =
     private {
-        Text : string
+        Text    : string
     }
-    override this.ToString() = 
-        sprintf "%s" (escaped this.Text)
+    override this.ToString() =
+        sprintf "%s" this.Text
 
-    static member (+) (r1:Plain, r2:Plain) = 
+    static member (+) (r1:ConstType, r2:ConstType) =
         let appd = r1.Text + r2.Text
         { Text = appd }
 
-    static member Create r = { Text = r}
+    static member Create r = { Text = r }
 
 
-and OneInSet =
+type PlainType =
+    private {
+        Text    : string
+    }
+    override this.ToString() = sprintf "%s" (escaped this.Text)
+
+    static member (+) (r1:PlainType, r2:PlainType) =
+        let appd = r1.Text + r2.Text
+        { Text = appd }
+
+    static member Create r = { Text = r }
+
+and OneInSetCharacterType =
+    |   CharacterString of string
+    |   CharacterRange  of char * char
+
+and OneInSetType =
     private {
         Invert      : bool
-        Mainset     : string
-        Subtractset : string
-        OneInSet    : Lazy<string>
+        Mainset     : OneInSetCharacterType
+        Subtractset : OneInSetCharacterType option
     }
 
-    static member OptimizeSet (ms:string) (ss:string) =
-        let sar = ss.ToCharArray()
+    static member Optimize (ms:string) =
         ms.ToCharArray()
-        |>  Array.filter(fun c -> not (Array.exists(fun ce -> ce = c) sar))
+        |>  Array.distinct
         |>  fun ca -> new string(ca)
 
     override this.ToString() =
-        let subtract = this.Subtractset <> ""
-        match (subtract, this.Invert) with 
+        match (this.Mainset, this.Subtractset, this.Invert) with
         //  https://msdn.microsoft.com/en-us/library/20bw873z(v=vs.110).aspx#Anchor_13
-        |   (true, true)    -> sprintf "[%s-[^%s]]" (escaped this.Subtractset) (escaped this.Mainset)
-        |   (true, false)   -> sprintf "[%s-[%s]]"  (escaped this.Mainset) (escaped this.Subtractset)
-        |   (false, true)   -> sprintf "[^%s]" (escaped this.Mainset)
-        |   (false, false)  -> sprintf "[%s]" (escaped this.Mainset)
+        |   (CharacterString ms, Some(CharacterString sb), true) ->
+            sprintf "[^%s-[%s]]" (escaped ms |> OneInSetType.Optimize) (escaped sb |> OneInSetType.Optimize)
+        |   (CharacterString ms, Some(CharacterString sb), false) ->
+            sprintf "[%s-[%s]]" (escaped ms |> OneInSetType.Optimize) (escaped sb |> OneInSetType.Optimize)
+        |   (CharacterString ms, Some(CharacterRange (ss,se)), true) ->
+            sprintf "[^%s-[%c-%c]]" (escaped ms |> OneInSetType.Optimize) ss se
+        |   (CharacterString ms, Some(CharacterRange (ss,se)), false) ->
+            sprintf "[%s-[%c-%c]]" (escaped ms |> OneInSetType.Optimize) ss se
+        |   (CharacterRange (ms,me),  Some(CharacterRange (ss,se)), true) ->
+            sprintf "[^%c-%c-[%c-%c]]"  ms me ss se
+        |   (CharacterRange (ms,me),  Some(CharacterRange (ss,se)), false) ->
+            sprintf "[%c-%c-[%c-%c]]"  ms me ss se
+        |   (CharacterRange (ms,me), Some(CharacterString sb), true) ->
+            sprintf "[^%c-%c-[%s]]" ms me (escaped sb |> OneInSetType.Optimize)
+        |   (CharacterRange (ms,me), Some(CharacterString sb), false) ->
+            sprintf "[%c-%c-[%s]]" ms me (escaped sb |> OneInSetType.Optimize)
+        |   (CharacterString ms, None, true) ->
+            sprintf "[^%s]" (escaped ms |> OneInSetType.Optimize)
+        |   (CharacterString ms, None, false) ->
+            sprintf "[%s]"  (escaped ms |> OneInSetType.Optimize)
+        |   (CharacterRange (ms,me),  None, true) ->
+            sprintf "[^%c-%c]" ms me
+        |   (CharacterRange (ms,me),  None, false) ->
+            sprintf "[%c-%c]" ms me
 
-    static member (-) (r1:OneInSet, r2:OneInSet) =
-        let ms = r1.Mainset
-        let ss =  r1.Subtractset + r2.Mainset
-        {Mainset = ms; Subtractset = ss; OneInSet = lazy(OneInSet.OptimizeSet ms ss); Invert = r1.Invert }
 
-    static member (-) (r1:OneInSet, r2:Plain) =
-        let ms = r1.Mainset
-        let ss = r1.Subtractset + r2.Text
-        {Mainset = ms; Subtractset = ss; OneInSet = lazy(OneInSet.OptimizeSet ms ss); Invert = r1.Invert }
+    static member (-) (r1:OneInSetType, r2:OneInSetType) =
+        match (r1.Mainset, r1.Subtractset, r2.Mainset, r2.Subtractset) with
+        |   (_, Some _, _, _)
+        |   (_, _, _, Some _) -> failwith "Can only subtract clean OneOf values - neither can contain previous subtractions."
+        |   (CharacterString m1, None, CharacterString m2, None) ->
+            {Mainset = CharacterString m1; Subtractset = Some (CharacterString m2); Invert = r1.Invert }
+        |   (CharacterString m1, None, CharacterRange(ms2, me2), None) ->
+            {Mainset = CharacterString m1; Subtractset = Some (CharacterRange (ms2, me2)); Invert = r1.Invert }
+        |   (CharacterRange(ms1, me1), None, CharacterRange(ms2, me2), None) ->
+            {Mainset = CharacterRange (ms1, me1); Subtractset = Some (CharacterRange(ms2, me2)); Invert = r1.Invert }
+        |   (CharacterRange(ms1, me1), None, CharacterString m2, None) ->
+            {Mainset = CharacterRange(ms1, me1); Subtractset = Some (CharacterString m2); Invert = r1.Invert }
 
-    static member (+) (r1:OneInSet, r2:OneInSet) =
-        let ms = r1.Mainset + r2.Mainset
-        let ss = r1.Subtractset + r2.Subtractset
-        {Mainset = ms; Subtractset = ss; OneInSet = lazy(OneInSet.OptimizeSet ms ss); Invert = r1.Invert }
 
-    static member (+) (_:OneInSet, _:Plain) =
-        failwith "Unsupported RGX addition"
+    static member (|||) (r1:OneInSetType, r2:OneInSetType) =
+        match (r1.Mainset, r1.Subtractset, r2.Mainset, r2.Subtractset) with
+        |   (_, Some _, _, _)
+        |   (_, _, _, Some _) -> failwith "Can only OR clean OneOf values - neither can contain previous subtractions."
+        |   (CharacterString m1, None, CharacterString m2, None) ->
+            {Mainset = CharacterString m1; Subtractset = Some (CharacterString m2); Invert = r1.Invert }
+        |   (CharacterString m1, None, CharacterRange(ms2, me2), None) ->
+            {Mainset = CharacterString m1; Subtractset = Some (CharacterRange(ms2, me2)); Invert = r1.Invert }
+        |   (CharacterRange(ms1, me1), None, CharacterString m2, None) ->
+            {Mainset = CharacterRange(ms1, me1); Subtractset = Some (CharacterString m2); Invert = r1.Invert }
+        |   (CharacterRange(ms1, me1), None, CharacterRange(ms2, me2), None) ->
+            {Mainset = CharacterRange(ms1, me1); Subtractset = Some (CharacterRange(ms2, me2)); Invert = r1.Invert }
 
-    static member Create r = 
-        {Mainset= r; Subtractset = ""; OneInSet = lazy(OneInSet.OptimizeSet r ""); Invert = false}
 
-    member this.Not() = 
+    static member Create r = {Mainset= r; Subtractset = None; Invert = false}
+
+    member this.Not() =
         {this with Invert = true}
 
 
 and RexPatt =
-    |   Plain of Plain
-    |   OneInSet   of OneInSet
+    |   Const of ConstType
+    |   Plain of PlainType
+    |   OneInSet   of OneInSetType
     |   Or         of RexPatt list
     |   Concat     of RexPatt list
     |   IterRange  of RexPatt * int * (int option)
@@ -103,9 +148,10 @@ and RexPatt =
     |   Group      of RexPatt
     |   NamedGroup of string * RexPatt
 
-    override this.ToString() = 
+    override this.ToString() =
         let str =
             match this with
+            |   Const    c -> c.ToString()
             |   Plain    r -> r.ToString()
             |   OneInSet r -> r.ToString()
             |   Or       l ->
@@ -129,32 +175,36 @@ and RexPatt =
         str
 
 
-    static member private DoConcat (r1:RexPatt, r2:RexPatt) = 
+    static member private DoConcat (r1:RexPatt, r2:RexPatt) =
         match (r1,r2) with
         |   (Concat c1, _) -> Concat(r2 :: c1)
         |   _   -> Concat([r2; r1])
 
-    static member (|||) (r1:RexPatt, r2:RexPatt) =
-        match (r1,r2) with
-        |   (OneInSet o1, OneInSet o2)   -> OneInSet(o1 + o2)
-        |   _ ->
+
+    static member private DoOr (r1:RexPatt, r2:RexPatt ) =
             match r1 with
             | Or     l ->   Or(r2 :: l)
             | _       ->    Or([r2; r1])
 
+
+    static member (|||) (r1:RexPatt, r2:RexPatt) =
+        match (r1,r2) with
+        |   (OneInSet o1, OneInSet o2)   -> OneInSet(o1 ||| o2)
+        |   _ -> RexPatt.DoOr(r1, r2)
+
+
     static member (-) (r1:RexPatt, r2:RexPatt) =
         match (r1,r2) with
         |   (OneInSet o1, OneInSet o2)  -> OneInSet(o1 - o2)
-        |   (OneInSet o1,    Plain p1)  -> OneInSet(o1 - p1)
-        |   _   -> failwith "Unsupported RGX subtraction"
+        |   _   -> failwith "Illegal subtraction, you can only subtract two OneOf sets"
 
     static member (+) (r1:RexPatt, r2:RexPatt) =
         match (r1,r2) with
         |   (Plain p1   , Plain p2)      -> Plain(p1 + p2)
-        |   (OneInSet o1, OneInSet o2)   -> OneInSet(o1 + o2)
+        |   (Const c1   , Const c2)      -> Const(c1 + c2)
         |   _   ->  RexPatt.DoConcat(r1, r2)
 
-    member this.Not = 
+    member this.Not =
         match this with
         |   OneInSet o1 ->  OneInSet(o1.Not())
         |   _   -> failwith "Unsupported Not-case"
@@ -176,10 +226,13 @@ let OnceOrMore(t) = OneOrMore(t)
 let Optional(t) = Optional(t)
 
 /// Plain regex pattern
-let Plain c = Plain(Plain.Create c)
+let Plain c = Plain(PlainType.Create c)
 
 /// One in Set regex pattern
-let OneOf c = OneInSet(OneInSet.Create c)
+let OneOf c = OneInSet(OneInSetType.Create (CharacterString c))
+
+/// Between - character range
+let Between s e = OneInSet(OneInSetType.Create (CharacterRange (s,e)))
 
 /// Exclude Set regex pattern
 let Not (c:RexPatt) = c.Not
@@ -190,12 +243,13 @@ let Group p = Group(p)
 /// Creates Regex named group
 let NamedGroup s p = NamedGroup(s,p)
 
-/// Regex ToString - match from string start
-let ToStringStartPattern (p:RexPatt) = sprintf "\\A(%O)" p
+module Convert =
+    /// Regex ToString - match from string start
+    let ToStringStartPattern (p:RexPatt) = sprintf "\\A(%O)" p
 
-/// Regex ToString - full string match
-let ToFullstringPattern (p:RexPatt) = sprintf "\\A(%O)\\z" p
+    /// Regex ToString - full string match
+    let ToFullstringPattern (p:RexPatt) = sprintf "\\A(%O)\\z" p
 
-/// Regex ToString - match anywhere in the string 
-let ToPattern (p:RexPatt) = sprintf "(%O)" p
+    /// Regex ToString - match anywhere in the string
+    let ToPattern (p:RexPatt) = sprintf "(%O)" p
 
