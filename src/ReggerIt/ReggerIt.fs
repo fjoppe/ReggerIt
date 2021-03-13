@@ -54,15 +54,14 @@ type PlainType =
 
     static member Create r = { Text = r }
 
+
 and OneInSetCharacterType =
-    |   CharacterString of string
-    |   CharacterRange  of char * char
+    |   CharacterString of bool * string
+    |   CharacterRange  of bool * char * char
 
 and OneInSetType =
     private {
-        Invert      : bool
-        Mainset     : OneInSetCharacterType
-        Subtractset : OneInSetCharacterType option
+        CharacterClass  : OneInSetCharacterType list
     }
 
     static member Optimize (ms:string) =
@@ -70,67 +69,42 @@ and OneInSetType =
         |>  Array.distinct
         |>  fun ca -> new string(ca)
 
+
+    static member TermToString (trm:OneInSetCharacterType) =
+        let pfx r = if r then "^" else ""
+        match trm with
+        |   CharacterString (inv,cs)   -> sprintf "%s%s" (pfx inv) cs
+        |   CharacterRange  (inv,s, e) -> sprintf "%s%c-%c" (pfx inv) s e
+
+
+
     override this.ToString() =
-        match (this.Mainset, this.Subtractset, this.Invert) with
-        //  https://msdn.microsoft.com/en-us/library/20bw873z(v=vs.110).aspx#Anchor_13
-        |   (CharacterString ms, Some(CharacterString sb), true) ->
-            sprintf "[^%s-[%s]]" (escaped ms |> OneInSetType.Optimize) (escaped sb |> OneInSetType.Optimize)
-        |   (CharacterString ms, Some(CharacterString sb), false) ->
-            sprintf "[%s-[%s]]" (escaped ms |> OneInSetType.Optimize) (escaped sb |> OneInSetType.Optimize)
-        |   (CharacterString ms, Some(CharacterRange (ss,se)), true) ->
-            sprintf "[^%s-[%c-%c]]" (escaped ms |> OneInSetType.Optimize) ss se
-        |   (CharacterString ms, Some(CharacterRange (ss,se)), false) ->
-            sprintf "[%s-[%c-%c]]" (escaped ms |> OneInSetType.Optimize) ss se
-        |   (CharacterRange (ms,me),  Some(CharacterRange (ss,se)), true) ->
-            sprintf "[^%c-%c-[%c-%c]]"  ms me ss se
-        |   (CharacterRange (ms,me),  Some(CharacterRange (ss,se)), false) ->
-            sprintf "[%c-%c-[%c-%c]]"  ms me ss se
-        |   (CharacterRange (ms,me), Some(CharacterString sb), true) ->
-            sprintf "[^%c-%c-[%s]]" ms me (escaped sb |> OneInSetType.Optimize)
-        |   (CharacterRange (ms,me), Some(CharacterString sb), false) ->
-            sprintf "[%c-%c-[%s]]" ms me (escaped sb |> OneInSetType.Optimize)
-        |   (CharacterString ms, None, true) ->
-            sprintf "[^%s]" (escaped ms |> OneInSetType.Optimize)
-        |   (CharacterString ms, None, false) ->
-            sprintf "[%s]"  (escaped ms |> OneInSetType.Optimize)
-        |   (CharacterRange (ms,me),  None, true) ->
-            sprintf "[^%c-%c]" ms me
-        |   (CharacterRange (ms,me),  None, false) ->
-            sprintf "[%c-%c]" ms me
+        let rec loop lst =
+            match lst with
+            |   []  -> failwith "Empty character class - this should never happen."
+            |   [i] -> sprintf "[%s]" (OneInSetType.TermToString i)
+            |   curr :: rest ->
+                let subtract = loop rest
+                sprintf "[%s-%s]" (OneInSetType.TermToString curr) subtract
+
+        loop this.CharacterClass
 
 
     static member (-) (r1:OneInSetType, r2:OneInSetType) =
-        match (r1.Mainset, r1.Subtractset, r2.Mainset, r2.Subtractset) with
-        |   (_, Some _, _, _)
-        |   (_, _, _, Some _) -> failwith "Can only subtract clean OneOf values - neither can contain previous subtractions."
-        |   (CharacterString m1, None, CharacterString m2, None) ->
-            {Mainset = CharacterString m1; Subtractset = Some (CharacterString m2); Invert = r1.Invert }
-        |   (CharacterString m1, None, CharacterRange(ms2, me2), None) ->
-            {Mainset = CharacterString m1; Subtractset = Some (CharacterRange (ms2, me2)); Invert = r1.Invert }
-        |   (CharacterRange(ms1, me1), None, CharacterRange(ms2, me2), None) ->
-            {Mainset = CharacterRange (ms1, me1); Subtractset = Some (CharacterRange(ms2, me2)); Invert = r1.Invert }
-        |   (CharacterRange(ms1, me1), None, CharacterString m2, None) ->
-            {Mainset = CharacterRange(ms1, me1); Subtractset = Some (CharacterString m2); Invert = r1.Invert }
+        { CharacterClass = r1.CharacterClass @ r2.CharacterClass }
 
 
-    static member (|||) (r1:OneInSetType, r2:OneInSetType) =
-        match (r1.Mainset, r1.Subtractset, r2.Mainset, r2.Subtractset) with
-        |   (_, Some _, _, _)
-        |   (_, _, _, Some _) -> failwith "Can only OR clean OneOf values - neither can contain previous subtractions."
-        |   (CharacterString m1, None, CharacterString m2, None) ->
-            {Mainset = CharacterString m1; Subtractset = Some (CharacterString m2); Invert = r1.Invert }
-        |   (CharacterString m1, None, CharacterRange(ms2, me2), None) ->
-            {Mainset = CharacterString m1; Subtractset = Some (CharacterRange(ms2, me2)); Invert = r1.Invert }
-        |   (CharacterRange(ms1, me1), None, CharacterString m2, None) ->
-            {Mainset = CharacterRange(ms1, me1); Subtractset = Some (CharacterString m2); Invert = r1.Invert }
-        |   (CharacterRange(ms1, me1), None, CharacterRange(ms2, me2), None) ->
-            {Mainset = CharacterRange(ms1, me1); Subtractset = Some (CharacterRange(ms2, me2)); Invert = r1.Invert }
+    static member OrOptimized (r1:OneInSetType, r2:OneInSetType) =
+        match (r1.CharacterClass, r2.CharacterClass) with
+        |   ([CharacterString (b1,m1)], [CharacterString (b2,m2)]) ->
+            if b1 = b2 then
+               Some ({ CharacterClass = [CharacterString (b1, m1 + m2)]})
+            else
+                None
+        |   _ -> None
 
 
-    static member Create r = {Mainset= r; Subtractset = None; Invert = false}
-
-    member this.Not() =
-        {this with Invert = true}
+    static member Create r = {CharacterClass = [r]}
 
 
 and RexPatt =
@@ -181,7 +155,7 @@ and RexPatt =
         |   _   -> Concat([r2; r1])
 
 
-    static member private DoOr (r1:RexPatt, r2:RexPatt ) =
+    static member internal DoOr (r1:RexPatt, r2:RexPatt ) =
             match r1 with
             | Or     l ->   Or(r2 :: l)
             | _       ->    Or([r2; r1])
@@ -189,7 +163,11 @@ and RexPatt =
 
     static member (|||) (r1:RexPatt, r2:RexPatt) =
         match (r1,r2) with
-        |   (OneInSet o1, OneInSet o2)   -> OneInSet(o1 ||| o2)
+        |   (OneInSet o1, OneInSet o2) ->
+            OneInSetType.OrOptimized(o1, o2)
+            |>  function
+                |   Some rs -> OneInSet rs
+                |   None    -> RexPatt.DoOr(r1, r2)
         |   _ -> RexPatt.DoOr(r1, r2)
 
 
@@ -204,10 +182,6 @@ and RexPatt =
         |   (Const c1   , Const c2)      -> Const(c1 + c2)
         |   _   ->  RexPatt.DoConcat(r1, r2)
 
-    member this.Not =
-        match this with
-        |   OneInSet o1 ->  OneInSet(o1.Not())
-        |   _   -> failwith "Unsupported Not-case"
 
 
 /// Regex pattern must repeat exactly given value
@@ -229,13 +203,16 @@ let Optional(t) = Optional(t)
 let Plain c = Plain(PlainType.Create c)
 
 /// One in Set regex pattern
-let OneOf c = OneInSet(OneInSetType.Create (CharacterString c))
+let OneOf c = OneInSet(OneInSetType.Create (CharacterString (false, c)))
+
+/// Not One in Set regex pattern
+let NotOneOf c = OneInSet(OneInSetType.Create (CharacterString(true, c)))
 
 /// Between - character range
-let Between s e = OneInSet(OneInSetType.Create (CharacterRange (s,e)))
+let Between s e = OneInSet(OneInSetType.Create (CharacterRange (false, s,e)))
 
-/// Exclude Set regex pattern
-let Not (c:RexPatt) = c.Not
+/// Not Between - character range
+let NotBetween s e = OneInSet(OneInSetType.Create (CharacterRange (true, s,e)))
 
 /// Creates Regex group
 let Group p = Group(p)
@@ -252,4 +229,74 @@ module Convert =
 
     /// Regex ToString - match anywhere in the string
     let ToPattern (p:RexPatt) = sprintf "(%O)" p
+
+
+module Macro =
+    let digit = Between 'A' 'F' ||| Between '0' '9'
+    let validate input pattern errMessage =
+        let mv = Regex.Match(input, (pattern |> Convert.ToFullstringPattern), RegexOptions.IgnoreCase)
+        if mv.Success then
+            mv.Value
+        else
+            failwith <| sprintf "Illegal input: '%s', %s" input errMessage
+
+    /// Any character except newline
+    let any = Const { Text = "."}
+
+    /// Any whitespace character
+    let whitespace = Const { Text = @"\s"}
+
+    /// Any non-whitespace character
+    let nonWhitespace = Const { Text = @"\S"}
+
+    /// Bell character
+    let bell = Const { Text = @"\a"}
+
+    /// Backspace character
+    let backspace = Const { Text = @"\u0008"}
+
+    /// Tab character
+    let tab = Const { Text = @"\t" }
+
+    /// Carriage return character
+    let carriageReturn = Const { Text = @"\r" }
+
+    /// Vertical tab character
+    let verticalTab = Const { Text = @"\v" }
+
+    /// Form feed character
+    let formFeed = Const { Text = @"\f" }
+
+    /// Newline character
+    let newLine = Const { Text = @"\n" }
+
+    /// Escape character
+    let escape = Const { Text = @"\a" }
+
+    /// ASCII character, input is 8-bit hex, ie "00", "AF", "FF"
+    let ascii (s:string) =
+        let pattern =  digit + digit
+        let hex = validate s pattern "expected hex-byte input, ie \"00\", \"AF\", \"FF\""
+        Const { Text = sprintf @"\x%s" hex}
+
+    /// UTF-16 character, input is 16-bit hex, ie "0000", "5AAF", "C0FF"
+    let utf16 (s:string) =
+        let pattern =  digit + digit + digit + digit
+        let hex = validate s pattern "expected hex-word input, ie \"0000\", \"5AAF\", \"C0FF\""
+        Const { Text = sprintf @"\u%s" hex}
+
+    /// Word character
+    let wordCharacter = Const { Text = @"\w" }
+
+    /// Non Word character
+    let nonWordCharacter = Const { Text = @"\W" }
+
+    /// Decimal digit
+    let decimalDigit = Const { Text = @"\d" }
+
+    /// Non-decimal digit
+    let nonDecimalDigit = Const { Text = @"\D" }
+
+    /// Named character range
+    let namedBlock n = Const { Text = sprintf @"\p{%s}" n}
 

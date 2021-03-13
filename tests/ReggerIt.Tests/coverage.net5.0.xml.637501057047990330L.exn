@@ -1,0 +1,23 @@
+ModuleId = "AC-FA-C0-39-E2-E9-F0-92-0E-26-98-25-BB-86-C2-ED-E9-A3-07-5E"
+hitPointId = 113
+context = Null
+exception = System.Collections.Generic.KeyNotFoundException: The given key '113' was not present in the dictionary.
+   at System.Collections.Generic.Dictionary`2.get_Item(TKey key)
+   at AltCover.Recorder.Counter.addSingleVisit(Dictionary`2 counts, String moduleId, Int32 hitPointId, Track context) in C:\projects\altcover\AltCover.Recorder\Base.fs:line 312
+   at AltCover.Recorder.Instance.I.addVisit(String moduleId, Int32 hitPointId, Track context) in C:\projects\altcover\AltCover.Recorder\Recorder.fs:line 264
+   at AltCover.Recorder.Instance.I.logException[a,b,c,d](a moduleId, b hitPointId, c context, d x)
+   at AltCover.Recorder.Instance.I.addVisit(String moduleId, Int32 hitPointId, Track context)
+   at AltCover.Recorder.Instance.I.visitImpl@293.Invoke(String moduleId, Int32 hitPointId, Track context)
+   at AltCover.Recorder.Instance.I.visitImpl(String moduleId, Int32 hitPointId, Track context)
+   at ReggerIt.RexPatt.op_Addition(RexPatt r1, RexPatt r2)
+   at ReggerIt.Simple.Construct.Tests.ReggerIt Tests.Simple Text patterns@73-8.Invoke(Unit _arg5)
+   at Expecto.Impl.execTestAsync@566-1.Invoke(Unit unitVar)
+   at Microsoft.FSharp.Control.AsyncPrimitives.CallThenInvoke[T,TResult](AsyncActivation`1 ctxt, TResult result1, FSharpFunc`2 part2)
+   at <StartupCode$FSharp-Core>.$Async.StartChild@1663-5.Invoke(AsyncActivation`1 ctxt)
+   at Microsoft.FSharp.Control.Trampoline.Execute(FSharpFunc`2 firstAction)
+   at Microsoft.FSharp.Control.TrampolineHolder.ExecuteWithTrampoline(FSharpFunc`2 firstAction)
+   at <StartupCode$FSharp-Core>.$Async.-ctor@155-1.Invoke(Object o)
+   at System.Threading.QueueUserWorkItemCallbackDefaultContext.Execute()
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()
+   at System.Threading._ThreadPoolWaitCallback.PerformWaitCallback()
+
