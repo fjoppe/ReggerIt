@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "ReggerIt",
     "classes": [
-      { "name": "ReggerIt", "rp": "ReggerIt_ReggerIt.htm", "cl": 89, "ucl": 19, "cal": 108, "tl": 302, "ct": "LineCoverage", "mc": "-", "cb": 45, "tb": 60, "lch": [], "bch": [], "hc": [] },
+      { "name": "ReggerIt", "rp": "ReggerIt_ReggerIt.htm", "cl": 89, "ucl": 21, "cal": 110, "tl": 308, "ct": "LineCoverage", "mc": "-", "cb": 45, "tb": 60, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 

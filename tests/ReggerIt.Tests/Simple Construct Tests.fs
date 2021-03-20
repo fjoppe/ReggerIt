@@ -4,7 +4,6 @@ open System
 open Expecto
 open ReggerIt
 open System.Text.RegularExpressions
-open ReggerIt
 
 
 module ``Simple ReggerIt Tests`` =

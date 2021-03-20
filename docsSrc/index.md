@@ -4,11 +4,15 @@
 
 ## What is ReggerIt?
 
-ReggerIt is a library that does this specific thing.  
+ReggerIt is a Domain Specific Language to be used to construct Regular Expression patterns.
 
 ## Why use ReggerIt?
 
-I created it because I had to solve an issue with this other thing.
+Reguler Expressions are a powerful tool. But it isn's very popular amnog developers because one can easily get lost when creating complex patterns. 
+
+ReggerIt addresses this problem by providing **composibility**. A complex pattern can be constructed from the ground up, using values and functions. This approach makes it easier to fix issues in the pattern, without getting lost in a parenthesis-counting-fest.
+
+
 
 ---
 

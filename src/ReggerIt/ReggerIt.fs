@@ -145,7 +145,7 @@ and RexPatt =
             |   OneOrMoreNonGreedy  t -> sprintf "(?:%O)+?" t
             |   Optional   t -> sprintf "(?:%O)?" t
             |   Group      t -> sprintf "(%O)" t
-            |   NamedGroup (s,t) -> sprintf "(&<%s>%O)" s t
+            |   NamedGroup (s,t) -> sprintf "(?<%s>%O)" s t
         str
 
 
@@ -193,8 +193,14 @@ let RepeatRange mn mx t = IterRange(t, mx, Some(mn))
 /// Regex pattern may repeat zero or more
 let ZeroOrMore t = ZeroOrMore(t)
 
+/// Regex pattern may repeat zero or more - non greedy
+let ZeroOrMoreNonGreedy t = ZeroOrMoreNonGreedy(t)
+
 /// Regex pattern may repeat once or more
 let OnceOrMore(t) = OneOrMore(t)
+
+/// Regex pattern may repeat once or more - non greedy
+let OnceOrMoreNonGreedy(t) = OneOrMoreNonGreedy(t)
 
 /// Make Regex optional
 let Optional(t) = Optional(t)

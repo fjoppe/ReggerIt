@@ -20,8 +20,14 @@ val RepeatRange : int -> int -> RexPatt -> RexPatt
 /// Regex pattern may repeat zero or more
 val ZeroOrMore : RexPatt -> RexPatt
 
+/// Regex pattern may repeat zero or more - non greedy
+val ZeroOrMoreNonGreedy : RexPatt -> RexPatt
+
 /// Regex pattern may repeat once or more
 val OnceOrMore : RexPatt -> RexPatt
+
+/// Regex pattern may repeat once or more - non greedy
+val OnceOrMoreNonGreedy : RexPatt -> RexPatt
 
 /// Make Regex optional
 val Optional : RexPatt -> RexPatt
