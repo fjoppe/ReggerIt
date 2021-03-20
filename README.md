@@ -13,8 +13,8 @@ ReggerIt is optimized to be used with [System.Text.RegularExpressions.Regex](htt
 
 GitHub Actions |
 :---: |
-[![GitHub Actions](https://github.com/fjoppe/ReggerIt/workflows/Build%20master/badge.svg)](https://github.com/frankjoppe@hotmail.com/ReggerIt/actions?query=branch%3Amaster) |
-[![Build History](https://buildstats.info/github/chart/fjoppe/ReggerIt)](https://github.com/frankjoppe@hotmail.com/ReggerIt/actions?query=branch%3Amaster) |
+[![GitHub Actions](https://github.com/fjoppe/ReggerIt/workflows/Build%20master/badge.svg)](https://github.com/fjoppe/ReggerIt/actions?query=branch%3Amaster) |
+[![Build History](https://buildstats.info/github/chart/fjoppe/ReggerIt)](https://github.com/fjoppe/ReggerIt/actions?query=branch%3Amaster) |
 
 ## NuGet 
 
