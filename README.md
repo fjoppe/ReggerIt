@@ -7,6 +7,8 @@ ReggerIt helps to reduce this complexity by providing a Domain Specific Language
 ReggerIt is optimized to be used with [System.Text.RegularExpressions.Regex](https://docs.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex?view=net-5.0) and provides for the ``pattern`` input parameter, in various matching functions/methods.
 
 
+Please check the [documentation](https://fjoppe.github.io/ReggerIt/).
+
 ---
 
 ## Builds
