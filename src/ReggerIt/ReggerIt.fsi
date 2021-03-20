@@ -6,8 +6,13 @@ open System.Text.RegularExpressions
 type RexPatt
 type RexPatt
 with
+    /// Match either left or right pattern
     static member (|||) : RexPatt * RexPatt -> RexPatt
+
+    /// Concatenate two sub-patterns
     static member (+) : RexPatt * RexPatt -> RexPatt
+
+    /// Subtract two Character Classes - Only works on ``OneOf`` and ``Between`` constructs
     static member (-) : RexPatt * RexPatt -> RexPatt
 
 
@@ -54,6 +59,7 @@ val Group : RexPatt -> RexPatt
 val NamedGroup : string -> RexPatt -> RexPatt
 
 
+/// Convert to pattern string
 module Convert =
     /// Regex ToString - match from string start
     val ToStringStartPattern : RexPatt -> string
@@ -65,6 +71,7 @@ module Convert =
     val ToPattern : RexPatt -> string
 
 
+/// Predefined macro's
 module Macro =
     /// Any character except newline
     val any : RexPatt

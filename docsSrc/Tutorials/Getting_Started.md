@@ -1,18 +1,19 @@
-# Getting Started
+# Example Complex Pattern
 
-ReggerIt is used to compose regular expression patterns, compatible for [Regex in the Microsoft DotNet framework](https://docs.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex).
+ReggerIt is used to compose regular expression patterns, compatible for the ``pattern`` parameter in [Regex in the Microsoft DotNet framework](https://docs.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex).
 
 
-The following is an example how to compose a pattern, which enables to read table-names from a SQL query.
+The example on this page demonstrates how to compose a pattern, which enables to read table-names from a SQL query.
 
 The composition is layered:
+
 * Definition of a label;
 * Definition how a table name is constructed;
 * The usage of tables in a SQL query - in the from and join clauses
 
-With this approach, it is also very easy to "debug" a regex pattern. You can temporarily out-comment parts of the pattern and test its remains, to check your expectations with the actual outcome. In the example below, you can the "from" clause without the "join"s.
+With this approach, it is also very easy to "debug" a regex pattern. You can temporarily out-comment parts of the pattern and test its remains, to check your expectations with the actual outcome. In the example below, you can test the "from" clause without the "join"s, by outcommenting the "join" part on line 36.
 
-Another example, if you change the definition of ``label`` - ie it must start with a letter - then this change is only applied in one place.
+Another easy-maintenance example: if you change the definition of ``label`` - ie it must start with a letter - then you only have to change line 12.
 
 
 ```fsharp

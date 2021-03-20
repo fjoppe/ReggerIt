@@ -1,7 +1,8 @@
 # Functions and operators
 
 The primary definition for a character match comes from:
-*   ``Plain`` match, ie ``Plain "A"`` matches the "A" character
+
+*   ``Plain`` match, ie ``Plain "A"`` matches the "A" character, ``Plain "Hello"`` matches the word "Hello"
 *   ``OneOf`` match, ie ``OneOf "AC"`` matches on "A" and "C"
 *   ``Between`` match, ie ``Between 'a' 'z'``  matches all characters between 'a' and 'z'
 *   Macro, the macro module provides various pre-defined character classes, including wildcard ``Macro.any``
