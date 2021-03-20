@@ -24,12 +24,14 @@ For example:
 ## Operators
 
 All Regular Expression (sub-)patterns can be used for these operators:
+
 *   ``+`` - concatenation, ie ``Plain "A" + Plain "B"`` (which is the same as Plain "AB");
 *   ``|||`` - or, either the left or right side must match, ie ``Plain "AB" ||| OneOf "CD"`` matches: "AB", "C", "D";
 
 ## Repetitions
 
 One can use one of these repetitions:
+
 *   ``ZeroOrMore`` - the input sub-pattern may repeat zero or more times;
 *   ``OnceOrMore`` - the input sub-pattern may repeat once or more times;
 *   ``RepeatRange`` - the input sub-pattern may repeat between a min and max times;
@@ -39,6 +41,7 @@ One can use one of these repetitions:
 ##  Grouping
 
 These ways are supported for groups:
+
 *   ``Group`` - Anonymous groups
 *   ``NamedGroup`` - NamedGroup
 
@@ -49,6 +52,7 @@ Naming groups make it a lot easier to extract sub-strings from a matching result
 ##  Conversion
 
 The conversion module is used to create the pattern-string:
+
 *   ``ToStringStartPattern`` - Creates the pattern from the input, the start of the input string must match the start of the pattern;
 *   ``ToFullstringPattern``  - Creates the pattern from the input, the full string must match the full pattern;
 *   ``ToPattern`` - Creates the pattern from the input, the pattern-matching can start in the middle of the input string, and may match a substring;
@@ -69,6 +73,7 @@ Regex.Match(input, pattern) // match success
 ##  Macro
 
 The ``Macro`` module contains various frequently used character classes and definitions:
+
 *   ``Macro.any`` - wildcard character, matches anything except newline
 *   ``Macro.whitespace`` - matches any whitespace, including space, tab, and more
 *   ``Macro.nonWhitespace`` - matches any non whitespace
