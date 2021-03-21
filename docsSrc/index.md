@@ -21,10 +21,10 @@ ReggerIt addresses this problem by providing **composibility**. A complex patter
     <div class="card h-100">
       <div class="card-body">
         <h5 class="card-title">Tutorials</h5>
-        <p class="card-text">Takes you by the hand through a series of steps to create your first thing. </p>
+        <p class="card-text">Learn by example. Compose a complex pattern to extract table names from a SQL Query. </p>
       </div>
       <div class="card-footer text-right   border-top-0">
-        <a href="{{siteBaseUrl}}/Tutorials/Getting_Started.html" class="btn btn-primary">Get started</a>
+        <a href="{{siteBaseUrl}}/Tutorials/Example_Complex_Pattern.html" class="btn btn-primary">Get started</a>
       </div>
     </div>
   </div>
@@ -32,18 +32,18 @@ ReggerIt addresses this problem by providing **composibility**. A complex patter
     <div class="card h-100">
       <div class="card-body">
         <h5 class="card-title">How-To Guides</h5>
-        <p class="card-text">Guides you through the steps involved in addressing key problems and use-cases. </p>
+        <p class="card-text">Learn to compose a pattern which validates a hexadecimal number in various formats. </p>
       </div>
       <div class="card-footer text-right   border-top-0">
-        <a href="{{siteBaseUrl}}/How_Tos/Doing_A_Thing.html" class="btn btn-primary">Learn Usecases</a>
+        <a href="{{siteBaseUrl}}/How_Tos/Hex_Input_Validation.html" class="btn btn-primary">Learn Usecases</a>
       </div>
     </div>
   </div>
   <div class="col mb-4 mb-md-0">
     <div class="card h-100">
       <div class="card-body">
-        <h5 class="card-title">Explanations</h5>
-        <p class="card-text">Discusses key topics and concepts at a fairly high level and provide useful background information and explanation..</p>
+        <h5 class="card-title">Background</h5>
+        <p class="card-text">Why this library was made in the first place..</p>
       </div>
       <div class="card-footer text-right   border-top-0">
         <a href="{{siteBaseUrl}}/Explanations/Background.html" class="btn btn-primary">Dive Deeper</a>

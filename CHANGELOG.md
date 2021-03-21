@@ -15,3 +15,11 @@ Added all library functions
 ### Removed
 [Unreleased]: https://github.com/fjoppe/ReggerIt/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/fjoppe/ReggerIt/releases/tag/v0.1.0
+
+## [Unreleased]
+
+## Changed
+
+*   Fixed bug by escaping '$' character
+*   Created unit test
+*   Improved documentation, fixed links..

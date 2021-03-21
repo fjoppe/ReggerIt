@@ -1,4 +1,4 @@
-# Functions and operators
+# Functions and Operators
 
 The primary definition for a character match comes from:
 

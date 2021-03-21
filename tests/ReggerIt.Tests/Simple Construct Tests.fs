@@ -564,3 +564,21 @@ module ``Simple ReggerIt Tests`` =
                     Expect.equal subject.Value input $"Match is not equal to input '{input}'"
                 )
         ]
+
+    [<Tests>]
+    let ``Escaped characters`` =
+        testList "Escaped characters" [
+            testCase $"FullString '$' Text" <| fun _ ->
+                let pattern =
+                    Plain "$"
+                    |>  Convert.ToFullstringPattern
+
+                let inputs = [ "$" ]
+
+                inputs
+                |>  List.iter(fun input ->
+                    let subject = Regex.Match(input, pattern)
+                    Expect.isTrue subject.Success $"Unsuccessful match on input '{input}'"
+                    Expect.equal subject.Value input $"Match is not equal to input '{input}'"
+                )
+        ]

@@ -24,6 +24,7 @@ let private escaped (s:string) =
         ("*","\*")
         (".","\.")
         ("?","\?")
+        ("$","\$")
     ]
     |>  List.fold(fun (st:string) (sch,rp) -> st.Replace(sch, rp) ) s
 

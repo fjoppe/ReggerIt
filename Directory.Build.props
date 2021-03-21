@@ -2,12 +2,12 @@
     <PropertyGroup>
         <!-- summary is not migrated from project.json, but you can use the <Description> property for that if needed. -->
         <PackageTags>f#, fsharp</PackageTags>
-        <PackageProjectUrl>https://github.com/frankjoppe@hotmail.com/ReggerIt</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/frankjoppe@hotmail.com/ReggerIt/blob/master/LICENSE.md</PackageLicenseUrl>
+        <PackageProjectUrl>https://github.com/fjoppe/ReggerIt</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/fjoppe/ReggerIt/blob/master/LICENSE.md</PackageLicenseUrl>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <RepositoryType>git</RepositoryType>
-        <Authors>frankjoppe@hotmail.com</Authors>
-        <RepositoryUrl>https://github.com/frankjoppe@hotmail.com/ReggerIt</RepositoryUrl>
+        <Authors>Frank Joppe</Authors>
+        <RepositoryUrl>https://github.com/fjoppe/ReggerIt</RepositoryUrl>
         <!-- owners is not supported in MSBuild -->
     </PropertyGroup>
 </Project>

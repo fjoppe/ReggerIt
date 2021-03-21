@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "ReggerIt",
     "classes": [
-      { "name": "ReggerIt", "rp": "ReggerIt_ReggerIt.htm", "cl": 89, "ucl": 21, "cal": 110, "tl": 308, "ct": "LineCoverage", "mc": "-", "cb": 45, "tb": 60, "lch": [], "bch": [], "hc": [] },
+      { "name": "ReggerIt", "rp": "ReggerIt_ReggerIt.htm", "cl": 90, "ucl": 21, "cal": 111, "tl": 309, "ct": "LineCoverage", "mc": "-", "cb": 45, "tb": 60, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -238,7 +238,7 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "ReggerIt", "class": "ReggerIt", "reportPath": "ReggerIt_ReggerIt.htm", "methodName": "System.String ReggerIt/RexPatt::ToString()", "methodShortName": "ToString()", "fileIndex": 0, "line": 127,
+    "assembly": "ReggerIt", "class": "ReggerIt", "reportPath": "ReggerIt_ReggerIt.htm", "methodName": "System.String ReggerIt/RexPatt::ToString()", "methodShortName": "ToString()", "fileIndex": 0, "line": 128,
     "metrics": [
       { "value": 14, "exceeded": false },
       { "value": 26, "exceeded": false },
